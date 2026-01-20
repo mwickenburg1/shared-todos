@@ -154,6 +154,17 @@
         "started": null,
         "completed": null,
         "parent_id": null
+      },
+      {
+        "id": 19,
+        "text": "[Velocity] Streamline GraphQL schema change workflow",
+        "priority": 2,
+        "context": "graph_generate.sh + codegen automation",
+        "status": "pending",
+        "created": "2026-01-20T13:20:43+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
       }
     ],
     "backlog": [
@@ -230,5 +241,5 @@
       "from_list": "today"
     }
   ],
-  "next_id": 19
+  "next_id": 20
 }
