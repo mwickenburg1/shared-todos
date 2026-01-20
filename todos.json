@@ -116,9 +116,9 @@
         "text": "Test task for validation",
         "priority": 2,
         "context": "Testing the collaborative workflow",
-        "status": "pending",
+        "status": "in_progress",
         "created": "2026-01-20T12:56:06+00:00",
-        "started": null,
+        "started": "2026-01-20T12:56:11+00:00",
         "completed": null,
         "parent_id": null
       }
