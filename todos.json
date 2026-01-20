@@ -116,10 +116,10 @@
         "text": "Test task for validation",
         "priority": 2,
         "context": "Testing the collaborative workflow",
-        "status": "in_progress",
+        "status": "done",
         "created": "2026-01-20T12:56:06+00:00",
         "started": "2026-01-20T12:56:11+00:00",
-        "completed": null,
+        "completed": "2026-01-20T12:56:40+00:00",
         "parent_id": null
       }
     ],
@@ -181,6 +181,18 @@
       "created": "2026-01-19T15:10:00+00:00",
       "started": null,
       "completed": "2026-01-19T17:39:35+00:00",
+      "parent_id": null,
+      "from_list": "today"
+    },
+    {
+      "id": 14,
+      "text": "Test task for validation",
+      "priority": 2,
+      "context": "Testing the collaborative workflow",
+      "status": "done",
+      "created": "2026-01-20T12:56:06+00:00",
+      "started": "2026-01-20T12:56:11+00:00",
+      "completed": "2026-01-20T12:56:40+00:00",
       "parent_id": null,
       "from_list": "today"
     }
