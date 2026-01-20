@@ -121,6 +121,17 @@
         "started": "2026-01-20T12:56:11+00:00",
         "completed": "2026-01-20T12:56:40+00:00",
         "parent_id": null
+      },
+      {
+        "id": 16,
+        "text": "[Velocity] Improve development workflow",
+        "priority": 1,
+        "context": "Parent task for velocity improvements",
+        "status": "pending",
+        "created": "2026-01-20T13:20:41+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
       }
     ],
     "backlog": [
@@ -197,5 +208,5 @@
       "from_list": "today"
     }
   ],
-  "next_id": 16
+  "next_id": 17
 }
