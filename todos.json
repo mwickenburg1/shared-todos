@@ -165,6 +165,17 @@
         "started": null,
         "completed": null,
         "parent_id": null
+      },
+      {
+        "id": 20,
+        "text": "[Velocity] Better hot-reload for Go services",
+        "priority": 2,
+        "context": "Investigate air or similar tools for webserver",
+        "status": "pending",
+        "created": "2026-01-20T13:20:44+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
       }
     ],
     "backlog": [
@@ -241,5 +252,5 @@
       "from_list": "today"
     }
   ],
-  "next_id": 20
+  "next_id": 21
 }
