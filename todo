@@ -192,11 +192,10 @@ cmd_complete() {
     
     local timestamp=$(date -Iseconds)
     local task_text=$(jq -r --argjson id "$id" '
-        .lists.today[] | select(.id == $id) | .text // 
-        .lists.backlog[] | select(.id == $id) | .text // empty
-    ' "$TODOS_FILE" 2>/dev/null | head -1)
+        [.lists.today[], .lists.backlog[]] | map(select(.id == $id)) | .[0].text // ""
+    ' "$TODOS_FILE" 2>/dev/null)
     
-    if [ -z "$task_text" ]; then
+    if [ -z "$task_text" ] || [ "$task_text" == "null" ]; then
         echo -e "${RED}Error: Task #$id not found${NC}"
         exit 1
     fi
