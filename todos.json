@@ -156,6 +156,17 @@
         "started": null,
         "completed": null,
         "parent_id": null
+      },
+      {
+        "id": 15,
+        "text": "Test backlog task",
+        "priority": 3,
+        "context": "Testing move functionality",
+        "status": "pending",
+        "created": "2026-01-20T12:56:45+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
       }
     ]
   },
@@ -197,5 +208,5 @@
       "from_list": "today"
     }
   ],
-  "next_id": 15
+  "next_id": 16
 }
