@@ -110,6 +110,17 @@
         "started": null,
         "completed": null,
         "parent_id": null
+      },
+      {
+        "id": 14,
+        "text": "Test task for validation",
+        "priority": 2,
+        "context": "Testing the collaborative workflow",
+        "status": "pending",
+        "created": "2026-01-20T12:56:06+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
       }
     ],
     "backlog": [
@@ -174,5 +185,5 @@
       "from_list": "today"
     }
   ],
-  "next_id": 14
+  "next_id": 15
 }
