@@ -1,0 +1,178 @@
+{
+  "lists": {
+    "today": [
+      {
+        "id": 1,
+        "text": "[Slack] Add channels:history to Workflows Slack user_scope OAuth",
+        "priority": 1,
+        "context": "Update /home/ubuntu/workflows/packages/pieces/community/slack/src/index.ts line 34",
+        "status": "pending",
+        "created": "2026-01-19T15:00:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      },
+      {
+        "id": 2,
+        "text": "[Slack] Rebuild and deploy Workflows",
+        "priority": 1,
+        "context": "npm run build + restart activepieces container",
+        "status": "pending",
+        "created": "2026-01-19T15:00:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      },
+      {
+        "id": 3,
+        "text": "[Slack] Test custom_api_call with useUserToken for channel history",
+        "priority": 2,
+        "context": "Verify user token can read public channels without bot membership",
+        "status": "pending",
+        "created": "2026-01-19T15:00:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      },
+      {
+        "id": 4,
+        "text": "[Slack] Create slack_get_channel_history_tool.go in streamer",
+        "priority": 2,
+        "context": "Dedicated super agent tool at pkg/agent/tools/wfproxy/slack/",
+        "status": "pending",
+        "created": "2026-01-19T15:00:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      },
+      {
+        "id": 5,
+        "text": "[Slack] Add SuperAgentSlackChannelHistoryEnabled org setting",
+        "priority": 3,
+        "context": "Conditional enablement for orgs like Elise",
+        "status": "pending",
+        "created": "2026-01-19T15:00:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      },
+      {
+        "id": 9,
+        "text": "[Forecasting] Verify submission flow works end-to-end",
+        "priority": 1,
+        "context": "Test ForecastIntakeModal: deal tagging step → forecast entry step → cells_save.go",
+        "status": "done",
+        "created": "2026-01-19T15:10:00+00:00",
+        "started": null,
+        "completed": "2026-01-19T17:39:35+00:00",
+        "parent_id": null
+      },
+      {
+        "id": 10,
+        "text": "[Forecasting] Review and fix sidebars UI",
+        "priority": 2,
+        "context": "ForecastCellHistorySidebar, PipelineCoverageSidebar, RepPopover - check styling and data display",
+        "status": "done",
+        "created": "2026-01-19T15:10:00+00:00",
+        "started": null,
+        "completed": "2026-01-19T17:39:35+00:00",
+        "parent_id": null
+      },
+      {
+        "id": 11,
+        "text": "[Forecasting] Ensure CRM record sync for org changes",
+        "priority": 2,
+        "context": "Verify deal data updates flow through from CRM → forecast_deal_tags → UI",
+        "status": "pending",
+        "created": "2026-01-19T15:10:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      },
+      {
+        "id": 12,
+        "text": "[Forecasting] Verify Deals tab looks good",
+        "priority": 2,
+        "context": "ForecastingDealsSection - search, pagination, category display, filtering",
+        "status": "pending",
+        "created": "2026-01-19T15:10:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      },
+      {
+        "id": 13,
+        "text": "Notify Elise about forecasting fixes",
+        "priority": 1,
+        "context": "Blocked by: release/deploy of ST-698 PR. Fixes: ORDER BY for WoW metrics, SOQL validation, multiple submissions per week",
+        "status": "pending",
+        "created": "2026-01-19T17:39:36+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      }
+    ],
+    "backlog": [
+      {
+        "id": 6,
+        "text": "[Slack] Implement thread extraction logic",
+        "priority": 2,
+        "context": "Group messages by thread_ts, fetch replies for threads",
+        "status": "pending",
+        "created": "2026-01-19T15:00:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      },
+      {
+        "id": 7,
+        "text": "[Slack] Build LLM analysis pipeline for Slack threads",
+        "priority": 3,
+        "context": "Extract topics, decisions, action items, sentiment",
+        "status": "pending",
+        "created": "2026-01-19T15:00:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      },
+      {
+        "id": 8,
+        "text": "[Slack] Integrate with CRM channel field for Elise",
+        "priority": 3,
+        "context": "Auto-select channel based on account's CRM field",
+        "status": "pending",
+        "created": "2026-01-19T15:00:00+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
+      }
+    ]
+  },
+  "completed_log": [
+    {
+      "id": 9,
+      "text": "[Forecasting] Verify submission flow works end-to-end",
+      "priority": 1,
+      "context": "Test ForecastIntakeModal: deal tagging step → forecast entry step → cells_save.go",
+      "status": "done",
+      "created": "2026-01-19T15:10:00+00:00",
+      "started": null,
+      "completed": "2026-01-19T17:39:35+00:00",
+      "parent_id": null,
+      "from_list": "today"
+    },
+    {
+      "id": 10,
+      "text": "[Forecasting] Review and fix sidebars UI",
+      "priority": 2,
+      "context": "ForecastCellHistorySidebar, PipelineCoverageSidebar, RepPopover - check styling and data display",
+      "status": "done",
+      "created": "2026-01-19T15:10:00+00:00",
+      "started": null,
+      "completed": "2026-01-19T17:39:35+00:00",
+      "parent_id": null,
+      "from_list": "today"
+    }
+  ],
+  "next_id": 14
+}

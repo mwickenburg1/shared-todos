@@ -1,0 +1,383 @@
+#!/bin/bash
+# Collaborative Todo List Manager
+# All operations pull first, then commit/push changes
+
+set -e
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TODOS_FILE="$REPO_DIR/todos.json"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+BOLD='\033[1m'
+
+# Ensure we're in the repo
+cd "$REPO_DIR"
+
+# Check if jq is available
+if ! command -v jq &> /dev/null; then
+    echo -e "${RED}Error: jq is required but not installed.${NC}"
+    echo "Install with: sudo apt-get install jq"
+    exit 1
+fi
+
+# Git sync functions
+sync_pull() {
+    if git remote -v | grep -q origin; then
+        echo -e "${CYAN}↓ Pulling latest changes...${NC}"
+        git pull --rebase origin main 2>/dev/null || true
+    fi
+}
+
+sync_push() {
+    local message="$1"
+    git add todos.json
+    if ! git diff --cached --quiet; then
+        git commit -m "$message"
+        if git remote -v | grep -q origin; then
+            echo -e "${CYAN}↑ Pushing changes...${NC}"
+            git push origin main
+        fi
+        echo -e "${GREEN}✓ Changes saved${NC}"
+    else
+        echo -e "${YELLOW}No changes to commit${NC}"
+    fi
+}
+
+# Display functions
+show_priority() {
+    case $1 in
+        1) echo -e "${RED}P1${NC}" ;;
+        2) echo -e "${YELLOW}P2${NC}" ;;
+        3) echo -e "${BLUE}P3${NC}" ;;
+        *) echo "P$1" ;;
+    esac
+}
+
+show_status() {
+    case $1 in
+        "pending") echo -e "${YELLOW}○${NC}" ;;
+        "in_progress") echo -e "${CYAN}◐${NC}" ;;
+        "done") echo -e "${GREEN}✓${NC}" ;;
+        *) echo "?" ;;
+    esac
+}
+
+# Commands
+cmd_list() {
+    sync_pull
+    
+    echo ""
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}                        📋 TODAY'S TASKS                        ${NC}"
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    
+    # Today's pending tasks
+    local pending=$(jq -r '.lists.today[] | select(.status != "done") | @json' "$TODOS_FILE" 2>/dev/null)
+    if [ -n "$pending" ]; then
+        echo "$pending" | while read -r task; do
+            local id=$(echo "$task" | jq -r '.id')
+            local text=$(echo "$task" | jq -r '.text')
+            local priority=$(echo "$task" | jq -r '.priority')
+            local status=$(echo "$task" | jq -r '.status')
+            local context=$(echo "$task" | jq -r '.context // empty')
+            
+            printf "  %s [%3d] $(show_priority $priority) %s\n" "$(show_status $status)" "$id" "$text"
+            if [ -n "$context" ]; then
+                echo -e "          ${CYAN}→ $context${NC}"
+            fi
+        done
+    else
+        echo -e "  ${GREEN}No pending tasks! 🎉${NC}"
+    fi
+    
+    # Today's completed tasks
+    local done_tasks=$(jq -r '.lists.today[] | select(.status == "done") | @json' "$TODOS_FILE" 2>/dev/null)
+    if [ -n "$done_tasks" ]; then
+        echo ""
+        echo -e "${BOLD}  ✅ Completed${NC}"
+        echo "$done_tasks" | while read -r task; do
+            local id=$(echo "$task" | jq -r '.id')
+            local text=$(echo "$task" | jq -r '.text')
+            printf "  ${GREEN}✓${NC} [%3d] %s\n" "$id" "$text"
+        done
+    fi
+    
+    echo ""
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}                          📦 BACKLOG                            ${NC}"
+    echo -e "${BOLD}═══════════════════════════════════════════════════════════════${NC}"
+    echo ""
+    
+    local backlog=$(jq -r '.lists.backlog[] | @json' "$TODOS_FILE" 2>/dev/null)
+    if [ -n "$backlog" ]; then
+        echo "$backlog" | while read -r task; do
+            local id=$(echo "$task" | jq -r '.id')
+            local text=$(echo "$task" | jq -r '.text')
+            local priority=$(echo "$task" | jq -r '.priority')
+            local context=$(echo "$task" | jq -r '.context // empty')
+            
+            printf "  ○ [%3d] $(show_priority $priority) %s\n" "$id" "$text"
+            if [ -n "$context" ]; then
+                echo -e "          ${CYAN}→ $context${NC}"
+            fi
+        done
+    else
+        echo -e "  ${GREEN}Backlog is empty${NC}"
+    fi
+    echo ""
+}
+
+cmd_add() {
+    local text="$1"
+    local priority="${2:-2}"
+    local list="${3:-today}"
+    local context="${4:-}"
+    
+    if [ -z "$text" ]; then
+        echo -e "${RED}Error: Task text is required${NC}"
+        echo "Usage: todo add \"Task description\" [priority] [list] [context]"
+        exit 1
+    fi
+    
+    sync_pull
+    
+    local next_id=$(jq '.next_id' "$TODOS_FILE")
+    local timestamp=$(date -Iseconds)
+    
+    # Create new task
+    local new_task=$(jq -n \
+        --arg text "$text" \
+        --argjson priority "$priority" \
+        --arg context "$context" \
+        --argjson id "$next_id" \
+        --arg created "$timestamp" \
+        '{
+            id: $id,
+            text: $text,
+            priority: $priority,
+            context: (if $context == "" then null else $context end),
+            status: "pending",
+            created: $created,
+            started: null,
+            completed: null,
+            parent_id: null
+        }')
+    
+    # Add to appropriate list and increment next_id
+    jq --argjson task "$new_task" --arg list "$list" \
+        '.lists[$list] += [$task] | .next_id += 1' "$TODOS_FILE" > "$TODOS_FILE.tmp" \
+        && mv "$TODOS_FILE.tmp" "$TODOS_FILE"
+    
+    echo -e "${GREEN}✓ Added task #$next_id to $list${NC}"
+    sync_push "Add task #$next_id: $text"
+}
+
+cmd_complete() {
+    local id="$1"
+    
+    if [ -z "$id" ]; then
+        echo -e "${RED}Error: Task ID is required${NC}"
+        echo "Usage: todo complete <id>"
+        exit 1
+    fi
+    
+    sync_pull
+    
+    local timestamp=$(date -Iseconds)
+    local task_text=$(jq -r --argjson id "$id" '
+        .lists.today[] | select(.id == $id) | .text // 
+        .lists.backlog[] | select(.id == $id) | .text // empty
+    ' "$TODOS_FILE" 2>/dev/null | head -1)
+    
+    if [ -z "$task_text" ]; then
+        echo -e "${RED}Error: Task #$id not found${NC}"
+        exit 1
+    fi
+    
+    # Update task status in both lists
+    jq --argjson id "$id" --arg ts "$timestamp" '
+        .lists.today = [.lists.today[] | if .id == $id then .status = "done" | .completed = $ts else . end] |
+        .lists.backlog = [.lists.backlog[] | if .id == $id then .status = "done" | .completed = $ts else . end]
+    ' "$TODOS_FILE" > "$TODOS_FILE.tmp" && mv "$TODOS_FILE.tmp" "$TODOS_FILE"
+    
+    # Add to completed_log
+    jq --argjson id "$id" '
+        (.lists.today[] | select(.id == $id)) as $task |
+        if $task then .completed_log += [$task + {from_list: "today"}] else . end
+    ' "$TODOS_FILE" > "$TODOS_FILE.tmp" && mv "$TODOS_FILE.tmp" "$TODOS_FILE"
+    
+    echo -e "${GREEN}✓ Completed task #$id${NC}"
+    sync_push "Complete task #$id: $task_text"
+}
+
+cmd_start() {
+    local id="$1"
+    
+    if [ -z "$id" ]; then
+        echo -e "${RED}Error: Task ID is required${NC}"
+        echo "Usage: todo start <id>"
+        exit 1
+    fi
+    
+    sync_pull
+    
+    local timestamp=$(date -Iseconds)
+    
+    jq --argjson id "$id" --arg ts "$timestamp" '
+        .lists.today = [.lists.today[] | if .id == $id then .status = "in_progress" | .started = $ts else . end] |
+        .lists.backlog = [.lists.backlog[] | if .id == $id then .status = "in_progress" | .started = $ts else . end]
+    ' "$TODOS_FILE" > "$TODOS_FILE.tmp" && mv "$TODOS_FILE.tmp" "$TODOS_FILE"
+    
+    echo -e "${CYAN}◐ Started task #$id${NC}"
+    sync_push "Start task #$id"
+}
+
+cmd_move() {
+    local id="$1"
+    local target_list="$2"
+    
+    if [ -z "$id" ] || [ -z "$target_list" ]; then
+        echo -e "${RED}Error: Task ID and target list are required${NC}"
+        echo "Usage: todo move <id> <today|backlog>"
+        exit 1
+    fi
+    
+    sync_pull
+    
+    # Find and remove task from current list, add to target
+    local task=$(jq --argjson id "$id" '
+        (.lists.today[] | select(.id == $id)) // (.lists.backlog[] | select(.id == $id))
+    ' "$TODOS_FILE")
+    
+    if [ "$task" == "null" ] || [ -z "$task" ]; then
+        echo -e "${RED}Error: Task #$id not found${NC}"
+        exit 1
+    fi
+    
+    jq --argjson id "$id" --argjson task "$task" --arg target "$target_list" '
+        .lists.today = [.lists.today[] | select(.id != $id)] |
+        .lists.backlog = [.lists.backlog[] | select(.id != $id)] |
+        .lists[$target] += [$task]
+    ' "$TODOS_FILE" > "$TODOS_FILE.tmp" && mv "$TODOS_FILE.tmp" "$TODOS_FILE"
+    
+    echo -e "${GREEN}✓ Moved task #$id to $target_list${NC}"
+    sync_push "Move task #$id to $target_list"
+}
+
+cmd_edit() {
+    local id="$1"
+    local field="$2"
+    local value="$3"
+    
+    if [ -z "$id" ] || [ -z "$field" ] || [ -z "$value" ]; then
+        echo -e "${RED}Error: Task ID, field, and value are required${NC}"
+        echo "Usage: todo edit <id> <text|priority|context> <value>"
+        exit 1
+    fi
+    
+    sync_pull
+    
+    case "$field" in
+        priority)
+            jq --argjson id "$id" --argjson val "$value" '
+                .lists.today = [.lists.today[] | if .id == $id then .priority = $val else . end] |
+                .lists.backlog = [.lists.backlog[] | if .id == $id then .priority = $val else . end]
+            ' "$TODOS_FILE" > "$TODOS_FILE.tmp" && mv "$TODOS_FILE.tmp" "$TODOS_FILE"
+            ;;
+        text|context)
+            jq --argjson id "$id" --arg field "$field" --arg val "$value" '
+                .lists.today = [.lists.today[] | if .id == $id then .[$field] = $val else . end] |
+                .lists.backlog = [.lists.backlog[] | if .id == $id then .[$field] = $val else . end]
+            ' "$TODOS_FILE" > "$TODOS_FILE.tmp" && mv "$TODOS_FILE.tmp" "$TODOS_FILE"
+            ;;
+        *)
+            echo -e "${RED}Error: Unknown field '$field'. Use: text, priority, context${NC}"
+            exit 1
+            ;;
+    esac
+    
+    echo -e "${GREEN}✓ Updated task #$id $field${NC}"
+    sync_push "Edit task #$id: set $field"
+}
+
+cmd_delete() {
+    local id="$1"
+    
+    if [ -z "$id" ]; then
+        echo -e "${RED}Error: Task ID is required${NC}"
+        echo "Usage: todo delete <id>"
+        exit 1
+    fi
+    
+    sync_pull
+    
+    jq --argjson id "$id" '
+        .lists.today = [.lists.today[] | select(.id != $id)] |
+        .lists.backlog = [.lists.backlog[] | select(.id != $id)]
+    ' "$TODOS_FILE" > "$TODOS_FILE.tmp" && mv "$TODOS_FILE.tmp" "$TODOS_FILE"
+    
+    echo -e "${GREEN}✓ Deleted task #$id${NC}"
+    sync_push "Delete task #$id"
+}
+
+cmd_sync() {
+    echo -e "${CYAN}Syncing with remote...${NC}"
+    sync_pull
+    git add -A
+    if ! git diff --cached --quiet; then
+        git commit -m "Manual sync"
+        if git remote -v | grep -q origin; then
+            git push origin main
+        fi
+        echo -e "${GREEN}✓ Synced${NC}"
+    else
+        echo -e "${GREEN}✓ Already up to date${NC}"
+    fi
+}
+
+cmd_help() {
+    echo ""
+    echo -e "${BOLD}Collaborative Todo List Manager${NC}"
+    echo ""
+    echo "Usage: todo <command> [args]"
+    echo ""
+    echo "Commands:"
+    echo "  list                          Show all todos"
+    echo "  add <text> [priority] [list] [context]"
+    echo "                                Add a new todo (priority: 1-3, list: today|backlog)"
+    echo "  complete <id>                 Mark a task as done"
+    echo "  start <id>                    Mark a task as in progress"
+    echo "  move <id> <today|backlog>     Move task between lists"
+    echo "  edit <id> <field> <value>     Edit task (field: text|priority|context)"
+    echo "  delete <id>                   Delete a task"
+    echo "  sync                          Manually sync with remote"
+    echo "  help                          Show this help"
+    echo ""
+    echo "All commands automatically pull before and push after changes."
+    echo ""
+}
+
+# Main
+case "${1:-list}" in
+    list|ls)    cmd_list ;;
+    add|a)      cmd_add "$2" "$3" "$4" "$5" ;;
+    complete|c|done) cmd_complete "$2" ;;
+    start|s)    cmd_start "$2" ;;
+    move|m)     cmd_move "$2" "$3" ;;
+    edit|e)     cmd_edit "$2" "$3" "$4" ;;
+    delete|d|rm) cmd_delete "$2" ;;
+    sync)       cmd_sync ;;
+    help|h|-h|--help) cmd_help ;;
+    *)
+        echo -e "${RED}Unknown command: $1${NC}"
+        cmd_help
+        exit 1
+        ;;
+esac
