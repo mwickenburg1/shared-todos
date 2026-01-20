@@ -143,6 +143,17 @@
         "started": null,
         "completed": null,
         "parent_id": null
+      },
+      {
+        "id": 18,
+        "text": "[Velocity] Optimize container rebuild times",
+        "priority": 2,
+        "context": "Reduce build.sh / build-restart.sh iteration time",
+        "status": "pending",
+        "created": "2026-01-20T13:20:43+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
       }
     ],
     "backlog": [
@@ -219,5 +230,5 @@
       "from_list": "today"
     }
   ],
-  "next_id": 18
+  "next_id": 19
 }
