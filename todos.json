@@ -121,6 +121,17 @@
         "started": "2026-01-20T12:56:11+00:00",
         "completed": "2026-01-20T12:56:40+00:00",
         "parent_id": null
+      },
+      {
+        "id": 15,
+        "text": "Test backlog task",
+        "priority": 3,
+        "context": "Testing move functionality",
+        "status": "pending",
+        "created": "2026-01-20T12:56:45+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
       }
     ],
     "backlog": [
@@ -153,17 +164,6 @@
         "context": "Auto-select channel based on account's CRM field",
         "status": "pending",
         "created": "2026-01-19T15:00:00+00:00",
-        "started": null,
-        "completed": null,
-        "parent_id": null
-      },
-      {
-        "id": 15,
-        "text": "Test backlog task",
-        "priority": 3,
-        "context": "Testing move functionality",
-        "status": "pending",
-        "created": "2026-01-20T12:56:45+00:00",
         "started": null,
         "completed": null,
         "parent_id": null
