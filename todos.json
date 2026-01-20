@@ -132,6 +132,17 @@
         "started": null,
         "completed": null,
         "parent_id": null
+      },
+      {
+        "id": 17,
+        "text": "[Velocity] Figure out how to run two envs in parallel",
+        "priority": 1,
+        "context": "Sub-item: streamer + streamer-env2 simultaneously",
+        "status": "pending",
+        "created": "2026-01-20T13:20:42+00:00",
+        "started": null,
+        "completed": null,
+        "parent_id": null
       }
     ],
     "backlog": [
@@ -208,5 +219,5 @@
       "from_list": "today"
     }
   ],
-  "next_id": 17
+  "next_id": 18
 }
